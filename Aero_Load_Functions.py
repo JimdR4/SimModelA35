@@ -34,7 +34,7 @@ def aero_load_interpolation(force_or_torque):
         for bi in range(Nb):                # repeating process for each spanwise location
             q_cs = data[:,bi]               # array containing all point loads along the chord for a spanwise location
             # Integrating q(z)
-            q_c[bi] = simpsons_rule_integration(dc/2, Ca-dc/2,81,q_cs)
+            q_c[bi] = simpsons_rule_integration(z_ax,81,q_cs)
 
         # Interpolation to obtain q(x)
         # Assume as solution,     q(x) = a0 + a1*x + a2*x^2 + a3*x^3 + ... + a40*x^40
@@ -58,7 +58,7 @@ def aero_load_interpolation(force_or_torque):
         for bi in range(Nb):
             t_cs = data[:,bi] * shear_dist
             # Integrating t(z)
-            t_c[bi] = simpsons_rule_integration(dc/2, Ca-dc/2, 81, t_cs)
+            t_c[bi] = simpsons_rule_integration(z_ax, 81, t_cs)
 
         # Interpolation to obtain t(x)
         # Assume as solution,     t(x) = a0 + a1*x + a2*x^2 + a3*x^3 + ... + a40*x^40
@@ -183,17 +183,67 @@ def aero_load_2_int_function(coordinates, coeff, direction):
 
     return val
 
-def simpsons_rule_integration(a, b, n, f):
-    ''' Input:      a = starting value for integration
-                    b = ending value for integration
-                    n = number of nodes used
-                    f = function values 
-        Output:     int = integrated value
+def aero_load_3_int_function(coordinates, coeff, direction):
+    ''' input:  coordinates =   x values  
+                coeff =         coefficients from the interpolation
+                direction =     choose between 'x' or 'z'
+        output: val =           function values for the coordinates used as input
+    '''
+    
+    Nb = 41     # number of spanwise segments
+    Nc = 81
+
+    if direction == 'x':
+        N = Nb
+    if direction == 'z':
+        N = Nc
+
+    if np.size(coordinates) >1: # when there is more then 1 coordinate
+        val = []
+        coeff1 = np.zeros(len(coeff))
+        coeff2 = np.zeros(len(coeff))
+        coeff3 = np.zeros(len(coeff))
+        for co in coordinates:
+            vect = np.zeros(N)
+            for i in range(N):
+                vect[i]   = co**(i+2)
+                coeff1[i] = coeff[i]/(i+1)
+                coeff2[i] = coeff1[i]/(i+2)
+                coeff3[i] = coeff2[i]/(i+3)
+            sol = np.dot(vect,coeff3)
+            val.append(sol)
+
+    else: # in case there is only 1 coordinate
+        vect = np.zeros(N)
+        coeff1 = np.zeros(len(coeff))
+        coeff2 = np.zeros(len(coeff))
+        coeff3 = np.zeros(len(coeff))
+        for i in range(N):
+            vect[i]   = coordinates**(i+2)
+            coeff1[i] = coeff[i]/(i+1)
+            coeff2[i] = coeff[i]/(i+2)
+            coeff3[i] = coeff[i]/(i+3)
+        val = np.dot(vect,coeff3)
+
+    return val
+
+def simpsons_rule_integration(coordinates, n, f):
+    ''' Input:      coordinates =   the domain over which to evaluate the integral
+                    n =             number of nodes used
+                    f =             function values 
+        Output:     int =           integrated value
 
         Remarks:    this method can only be used when n is an odd number
     '''
     if n%2 == 0:
         raise ValueError('n (the number of nodes used) must be an odd number')
+
+    if coordinates[1] < 0:
+        a = coordinates[-1]
+        b = coordinates[0]
+    else:
+        a = coordinates[0]
+        b = coordinates[-1]
 
     h = (b-a)/n
     int = h/3 * np.sum(f[0:-1:2] + 4*f[1::2] + f[2::2])
@@ -211,7 +261,7 @@ def simpsons_rule_integration(a, b, n, f):
 #     y1 = aero_load_1_int_function(x, coeff, 'x')
 #     y2 = aero_load_2_int_function(x, coeff, 'x')
 
-#     Ii = simpsons_rule_integration(x[0],x[-1],n,y2)
+#     Ii = simpsons_rule_integration(x,n,y2)
 #     I.append(Ii)
 
 # plt.plot(x,y,'bo',x,y,'k')
