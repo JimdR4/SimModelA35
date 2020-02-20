@@ -1,4 +1,5 @@
 import numpy as np 
+# from matplotlib import pyplot as plt
 
 def aero_load_interpolation(force_or_torque):
     ''' Input:  force_or_torque =   Choose if you want to find the coefficients for the interpolant q(x) ['force'] or the coefficients for the interpolant t(x) ['shear']
@@ -281,3 +282,24 @@ def aero_co():
     zdisc = -1 * zdisc
 
     return xdisc, zdisc
+
+# For testing
+# coeff, q, x_dom = aero_load_interpolation('torque')
+
+# I = []
+# for n in range(3,200,2):
+#     x = np.linspace(x_dom[0],x_dom[-1],n)
+#     y = aero_load_function(x, coeff, 'x')
+#     y1 = aero_load_1_int_function(x, coeff, 'x')
+#     y2 = aero_load_2_int_function(x, coeff, 'x')
+#     y3 = aero_load_3_int_function(x, coeff, 'x')
+
+#     Ii = simpsons_rule_integration(x,n,y3)
+#     I.append(Ii)
+
+# plt.plot(x,y,'bo',x,y,'k')
+# plt.plot(x,y1,'bo',x,y1,'k')
+# plt.plot(x,y2,'bo',x,y2,'k')
+# plt.plot(x,y3,'bo',x,y3,'k')
+# plt.grid()
+# plt.show()
