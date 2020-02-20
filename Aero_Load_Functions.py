@@ -12,17 +12,12 @@ def aero_load_interpolation(force_or_torque):
     data = np.genfromtxt(aero_data,delimiter=',') # column is spanwise // row is chordwise
 
     ''' Input variables '''
-    Ca = 0.515  # [m] / chord length 
-    la = 2.691  # [m] / span length
     Nb = 41     # number of spanwise segments
     Nc = 81     # number of chordwise segments
     sc_z = -0.1 # assumption for now / chord runs from 0 to -0.515
 
     ''' Start program '''
     # Constants
-    dc = Ca/Nc                          # segment width in chordwise direction
-    db = la/Nb                          # segment width in spanwise direction
-
     x_dom, z_dom = aero_co()
     shear_dist = z_dom - sc_z
 
