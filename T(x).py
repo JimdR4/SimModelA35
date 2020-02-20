@@ -13,7 +13,7 @@ from Aero_Load_Functions import aero_load_interpolation, aero_load_1_int_functio
 
 def T_x(R1y,R2y,R3y,R_I,z_hat,x):
     
-    coeff = aero_load_interpolation(torque)
+    coeff = aero_load_interpolation('torque')
     val = aero_load_1_int_function(x, coeff, 'x')
 
     #Defining all the x locations:
