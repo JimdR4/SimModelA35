@@ -222,6 +222,54 @@ def aero_load_3_int_function(coordinates, coeff, direction):
 
     return val
 
+def aero_load_4_int_function(coordinates, coeff, direction):
+    ''' input:  coordinates =   x values  
+                coeff =         coefficients from the interpolation
+                direction =     choose between 'x' or 'z'
+        output: val =           function values for the coordinates used as input
+    '''
+    
+    Nb = 41     # number of spanwise segments
+    Nc = 81     # number of chordwise segments
+
+    if direction == 'x':
+        N = Nb
+    if direction == 'z':
+        N = Nc
+
+    if np.size(coordinates) >1: # when there is more then 1 coordinate
+        val = []
+        coeff1 = np.zeros(len(coeff))
+        coeff2 = np.zeros(len(coeff))
+        coeff3 = np.zeros(len(coeff))
+        coeff4 = np.zeros(len(coeff))
+        for co in coordinates:
+            vect = np.zeros(N)
+            for i in range(N):
+                vect[i]   = co**(i+2)
+                coeff1[i] = coeff[i]/(i+1)
+                coeff2[i] = coeff1[i]/(i+2)
+                coeff3[i] = coeff2[i]/(i+3)
+                coeff4[i] = coeff3[i]/(i+4)
+            sol = np.dot(vect,coeff4)
+            val.append(sol)
+
+    else: # in case there is only 1 coordinate
+        vect = np.zeros(N)
+        coeff1 = np.zeros(len(coeff))
+        coeff2 = np.zeros(len(coeff))
+        coeff3 = np.zeros(len(coeff))
+        coeff4 = np.zeros(len(coeff))
+        for i in range(N):
+            vect[i]   = coordinates**(i+2)
+            coeff1[i] = coeff[i]/(i+1)
+            coeff2[i] = coeff[i]/(i+2)
+            coeff3[i] = coeff[i]/(i+3)
+            coeff4[i] = coeff[i[/(i+4)
+        val = np.dot(vect,coeff4)
+
+    return val
+
 def simpsons_rule_integration(coordinates, n, f):
     ''' Input:      coordinates =   the domain over which to evaluate the integral
                     n =             number of nodes used
