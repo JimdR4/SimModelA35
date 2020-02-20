@@ -34,7 +34,7 @@ def aero_load_interpolation(force_or_torque):
         for bi in range(Nb):                # repeating process for each spanwise location
             q_cs = data[:,bi]               # array containing all point loads along the chord for a spanwise location
             # Integrating q(z)
-            q_c[bi] = simpsons_rule_integration(z_ax,81,q_cs)
+            q_c[bi] = simpsons_rule_integration(z_ax,Nc,q_cs)
 
         # Interpolation to obtain q(x)
         # Assume as solution,     q(x) = a0 + a1*x + a2*x^2 + a3*x^3 + ... + a40*x^40
@@ -58,7 +58,7 @@ def aero_load_interpolation(force_or_torque):
         for bi in range(Nb):
             t_cs = data[:,bi] * shear_dist
             # Integrating t(z)
-            t_c[bi] = simpsons_rule_integration(z_ax, 81, t_cs)
+            t_c[bi] = simpsons_rule_integration(z_ax, Nc, t_cs)
 
         # Interpolation to obtain t(x)
         # Assume as solution,     t(x) = a0 + a1*x + a2*x^2 + a3*x^3 + ... + a40*x^40
