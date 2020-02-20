@@ -47,7 +47,7 @@ def aero_load_interpolation(force_or_torque):
         A = np.ones((Nb,Nb))
         for column in range(1,Nb):
             A[:,column] = x_dom**column
-        coeff = np.linalg.solve(A,q_c) # coefficients of the function // q(z) = a0 + a1*z + a2*z^2 + ... + a60*z^60
+        coeff = np.linalg.solve(A,q_c) # coefficients of the function // q(z) = a0 + a1*z + a2*z^2 + ... + a40*z^40
 
         return coeff, q_c, x_dom
     
@@ -71,7 +71,7 @@ def aero_load_interpolation(force_or_torque):
         A = np.ones((Nb,Nb))
         for column in range(1,Nb):
             A[:,column] = x_dom**column
-        coeff = np.linalg.solve(A,t_c) # coefficients of the function // q(z) = a0 + a1*z + a2*z^2 + ... + a60*z^60
+        coeff = np.linalg.solve(A,t_c) # coefficients of the function // t(z) = a0 + a1*z + a2*z^2 + ... + a40*z^40
 
         return coeff, t_c, x_dom
 
@@ -83,7 +83,7 @@ def aero_load_function(coordinates, coeff, direction):
     '''
     
     Nb = 41     # number of spanwise segments
-    Nc = 81
+    Nc = 81     # number of chordwise segments
 
     if direction == 'x':
         N = Nb
@@ -115,7 +115,7 @@ def aero_load_1_int_function(coordinates, coeff, direction):
     '''
     
     Nb = 41     # number of spanwise segments
-    Nc = 81
+    Nc = 81     # number of chordwise segments
 
     if direction == 'x':
         N = Nb
@@ -151,7 +151,7 @@ def aero_load_2_int_function(coordinates, coeff, direction):
     '''
     
     Nb = 41     # number of spanwise segments
-    Nc = 81
+    Nc = 81     # number of chordwise segments
 
     if direction == 'x':
         N = Nb
@@ -191,7 +191,7 @@ def aero_load_3_int_function(coordinates, coeff, direction):
     '''
     
     Nb = 41     # number of spanwise segments
-    Nc = 81
+    Nc = 81     # number of chordwise segments
 
     if direction == 'x':
         N = Nb
