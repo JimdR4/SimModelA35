@@ -71,3 +71,31 @@ Izzstringer = (((strloc[1,1])**2)*2*astr) + (((strloc[2,1])**2)*2*astr) + (((str
 #total Izz
 Izz = Izzcirc + Izzcone + Izzspar + Izzstringer
 #print(Izz)
+
+#x and z discretization
+Nz = 81
+Nx = 41
+
+xdisc = np.zeros((Nx,1))
+zdisc = np.zeros((Nz,1))
+#determine the x locations of the distcretization of q(x,z)
+for i in range(1,Nx):
+    #calculate theta_(x,i)
+    thetaxi = ((i-1)/Nx)*m.pi
+    #calculate theta_(x,i+1)
+    thetaxi2 = ((i)/Nx)*m.pi
+    #calculate x_i
+    xi = 0.5 * ((l/2)*(1-m.cos(thetaxi))+(l/2)*(1-m.cos(thetaxi2)))
+    xdisc[i,0] = xi
+#print(xdisc)
+    
+#determine the y locations of the distcretization of q(x,z)
+for i in range(1,Nz):
+    #calculate theta_(z,i)
+    thetazi = ((i-1)/Nz)*m.pi
+    #calculate theta_(z,i+1)
+    thetazi2 = ((i)/Nz)*m.pi
+    #calculate z_i
+    zi = 0.5 * ((c/2)*(1-m.cos(thetazi))+(c/2)*(1-m.cos(thetazi2)))
+    zdisc[i,0] = zi
+#print(zdisc)
