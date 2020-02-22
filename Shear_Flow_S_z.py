@@ -1,3 +1,5 @@
+''' Still needs to be verified '''
+
 import numpy as np 
 # from Z_Coordinates_Stringers import z_coordinates_stringers
 # from MOI_and_Centroid import MOI_and_centroid
@@ -306,6 +308,3 @@ omega2 = -np.pi/2       # value between -pi/2 and 0
 shear_flow_6 = q_b51(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, omega2)
 
 print('\nshear flow circ_up: ',shear_flow_1,'\nshear flow spar_up: ', shear_flow_2,'\nshear flow straight_up: ', shear_flow_3,'\nshear flow straight_lo: ', shear_flow_4,'\nshear flow spar_lo: ', shear_flow_5,'\nshear flow circ_lo: ', shear_flow_6)
-
-print()
-
