@@ -88,8 +88,9 @@ def z_coordinates_stringers(Ca, h, n_stringer):
                     h  = aileron height
                     n_stringer = number of stringers used (ONLY ODD NUMBERS)
         Output:     strloc = the z coordinates for the stringers on the leading edge and top/bottom
-                    str_on_circ = number of stringers on the circular part (except leading edge)
-                    str_on_straight = number of stringers on the straight part
+                    str_name = an array containing a 'c' on the same index as strloc if the stringer is placed on the circle 
+                                                     's' on the same index as strloc if the stringer is placed on the straight part
+                    l_straight = the length of the straight skin part of the upper part of the airfoil
         Remarks:    length of strloc = (number of stringer on the circular part) + (number of stringers on the straight part) + (string on leading edge)
                     function works only for an odd number of stringers
     """
