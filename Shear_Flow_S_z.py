@@ -1,3 +1,8 @@
+'''
+Created on Fri Feb 21 2020
+@author: Frans Vossen
+'''
+
 import numpy as np 
 from matplotlib import pyplot as plt
 
@@ -307,7 +312,7 @@ t_sp = 2.2 * 10**(-3)                   # correct value
 h    = 0.248                            # correct value
 R    = h/2                              # correct value
 Ca   = 0.515                            # correct value
-n_stringer = 11                         # correct value
+n_stringer = 15                         # correct value
 
 number_of_steps_on_domain = 1000
 
@@ -362,3 +367,5 @@ plt.show()
 plt.figure('circ part 2, pos: clock wise')
 plt.plot(omega2, shear_flow_6)
 plt.show()
+
+print()

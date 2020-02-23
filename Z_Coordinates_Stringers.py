@@ -1,3 +1,7 @@
+'''
+Created on Fri Feb 21 2020
+@author: Frans Vossen
+'''
 import numpy as np 
 
 def z_coordinates_stringers(Ca, h, n_stringer):
