@@ -1,92 +1,121 @@
 import numpy as np
-import math
-
-#import data set
-dataset = np.loadtxt(r'C:\Users\jimri\Downloads\Studie\VerificationNValidation\aerodynamicloaddo228.dat',dtype='float', delimiter=',')
-
-''' Input variables '''
-Ca = 0.515  # [m] / chord length 
-la = 2.691  # [m] / span length
-Nx = 41     # number of spanwise segments
-Nz = 81     # number of chordwise segments
-Force_z = dataset.T #transpose is Airodynamic force in Z direction
-Force_x = dataset 
-
-#Create to store the unequally spaced nodes
-Xnodes = np.zeros(Nx)
-Znodes = np.zeros(Nz)
-
-
-def angle(i,N):
-    th =  (i-1)/N*math.pi
-    return th
 
 #### Implementing the node spacing formulas in the lists
-for i in range(1, Nz+1):
-    Znodes[i-1] =  -Ca/4*(2 - math.cos(angle(i, Nz)) - math.cos(angle(i+1, Nz)))
-for i in range(1, Nx+1):
-    Xnodes[i-1] = la/4*(2 - math.cos(angle(i, Nx)) - math.cos(angle(i+1, Nx)))
+def aero_nodes(Ca, la, Nz, Nx):
 
+    Xnodes = np.zeros(Nx)
+    Znodes = np.zeros(Nz)
+
+    def angle(i,N):
+        th =  (i-1)/N*np.pi
+        return th
+
+    for i in range(1, Nz+1):
+        Znodes[i-1] =  -Ca/4*(2 - np.cos(angle(i, Nz)) - np.cos(angle(i+1, Nz)))
+    for i in range(1, Nx+1):
+        Xnodes[i-1] = la/4*(2 - np.cos(angle(i, Nx)) - np.cos(angle(i+1, Nx)))
+
+    return Znodes, Xnodes
 
 #All data is structured, lets start with those cubic splinessss :), for this the second sammery for Applied Numerical Analysis is used#
 def interpolation(F, axis):
-    Sol = np.zeros((len(F)-1, 4, len(F.T)-1)) #all splines are stored in here
+    ''' Input:  F = 1-D array containing all function values of the data points that needs to be interpolated
+                axis = 1-D array containing all grid points
+        Output: Coeff = 4xlen(axis) array containing all coefficients for the splines
+        Remarks:      s_i = a*(x-x_i)**3 + b*(x-x_i)**2 + c*(x-x_i) + d
+                      Coeff[0,:] all 'a' coefficients
+                      Coeff[1,:] all 'b' coefficients
+                      Coeff[2,:] all 'c' coefficients
+                      Coeff[3,:] all 'd' coefficients
+    '''
+    Coeff = np.zeros((4, len(F.T)-1)) #all splines are stored in here
 
-    for r in range(len(F)-1):
-
-        n = len(axis)-1 #number of needed splines 
-        h = np.zeros(n) #the stepsize between nodes will be stored in here
-        a = np.zeros(n) #a,b,c need to be solved to create our spline
-        b = np.zeros(n)
-        c = np.zeros(n)
-        d = F[r,:] #d is always equal to the force
+    n = len(axis)-1 # number of needed splines 
+    h = np.zeros(n) # the stepsize between nodes will be stored in here
+    a = np.zeros(n) # a,b,c need to be solved to create our spline
+    b = np.zeros(n)
+    c = np.zeros(n)
+    d = F        # d is always equal to the force
         
-        
-        for i in range(0,n):           
-            h[i] = (axis[i+1] - axis[i])
-        
-        S = np.zeros((n+1, n+1)) #the matrix to store the equations
-        S[0,0] = 1                  #top right and bottom left corner are  non zero
-        S[n,n] = 1
-        for j in range(1,n):        #sammary used to solve all values
-            S[j,j] = (h[j-1] + h[j])/3
-            S[j,j-1] = h[j-1]/6
-            S[j,j+1] = h[j]/6
-        
-            
-        #To be able to solve S*c = v for c, we create v
-        v = np.zeros(n+1) #add one because we substracted one earlier  
-        
-        for k in range(0,n-1):
-            v[k+1] = 3*((d[k+2]-d[k+1])/h[k+1] - (d[k+1]-d[k])/h[k])
-        
-        #solve S*b = v, v are the M values, the solutions to the derivatives of the first and second order
-        b = np.linalg.solve(S, v)
-        
-        #Solve for a and c   
-        for l in range(0, n):
-            c[l] = (d[l+1]-d[l])/h[l] - h[l]*(2*b[l]+b[l+1])/3        #c variable solved
-            a[l] = (b[l+1] - b[l])/(3*h[l])                             #a variable solved
-        #Remove last element to have 80 intervals
-        b = b[:-1]
-        d = d[:-1]
-        
-        #store the solutions to Sol in the proper place
-        Sol[r, 0, :] = a
-        Sol[r, 1, :] = b
-        Sol[r, 2, :] = c
-        Sol[r, 3, :] = d         
-        
-    return Sol
-
-
-
-Sol_z = interpolation(Force_z,Znodes )
-Sol_x = interpolation(Force_x, Xnodes)
-
-
-
-
-
-
+    for i in range(n):           
+        h[i] = (axis[i+1] - axis[i])
     
+    S = np.zeros((n+1, n+1)) #the matrix to store the equations
+    S[0,0] = 1               #top right and bottom left corner are  non zero
+    S[n,n] = 1
+    for j in range(1,n):     #sammary used to solve all values
+        S[j,j] = (h[j-1] + h[j])/3
+        S[j,j-1] = h[j-1]/6
+        S[j,j+1] = h[j]/6
+    
+    #To be able to solve S*c = v for c, we create v
+    v = np.zeros(n+1) #add one because we substracted one earlier  
+    
+    for k in range(len(axis)-2):
+        v[k] = (d[k+2] - d[k+1])/h[k+1] - (d[k+1] - d[k])/h[k]
+
+    # for k in range(n-1):
+    #     v[k+1] = 3*((d[k+2]-d[k+1])/h[k+1] - (d[k+1]-d[k])/h[k])
+    
+    # solve S*b = v, v are the M values, the solutions to the derivatives of the first and second order
+    b = np.linalg.solve(S, v)
+    
+    #Solve for a and c   
+    for l in range(n):
+        # c[l] = (d[l+1]-d[l])/h[l] - h[l]*(2*b[l]+b[l+1])/3          #c variable solved
+        c[l] = (d[l+1]-d[l])/h[l] - h[l]*b[l]/3 - h[l]*b[l+1]/6
+        # a[l] = (b[l+1] - b[l])/(3*h[l])                             #a variable solved
+        a[l] = (d[l+1] - d[l])/(6*h[l])
+
+    #Remove last element to have 80 intervals
+    b = b[:-1]
+    d = d[:-1]
+    
+    #store the solutions to Sol in the proper place
+    Coeff[0,:] = a
+    Coeff[1,:] = b
+    Coeff[2,:] = c
+    Coeff[3,:] = d         
+        
+    return Coeff
+
+def funct_cub_spline(domain, direction, nodes_co, coeff):
+    ''' Input:  domain = 
+                direction =
+                nodes_co =
+                coeff =
+        Output: val = 
+    '''
+    if direction == 'chord':
+        q_z = []
+        for z in domain:
+            if z == nodes_co[0]:
+                index = 0
+            if z == nodes_co[-1]:
+                index = len(coeff[0]) -1
+            else:
+                index = np.where(np.abs(nodes_co) > abs(z))[0][0] -1 # find the index of the closest Znode to the left of the z coordinate 
+
+            val = coeff[0][index] * (z - nodes_co[index])**3 + coeff[1][index] * (z - nodes_co[index])**2 + coeff[2][index] * (z - nodes_co[index]) + coeff[3][index] 
+            q_z.append(val)
+
+        q_z = np.asarray(q_z)
+
+        return q_z
+    
+    if direction == 'span':
+        q_x = []
+        for x in domain:
+            if x == nodes_co[0]:
+                index = 0
+            if x == nodes_co[-1]:
+                index = len(coeff[0]) -1
+            else:
+                index = np.where(nodes_co > x)[0][0] -1 # find the index of the closest Znode to the left of the z coordinate 
+
+            val = coeff[0][index] * (x - nodes_co[index])**3 + coeff[1][index] * (x - nodes_co[index])**2 + coeff[2][index] * (x - nodes_co[index]) + coeff[3][index] 
+            q_x.append(val)
+        
+        q_x = np.asarray(q_x)
+
+        return q_x
