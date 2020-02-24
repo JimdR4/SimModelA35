@@ -6,13 +6,12 @@ Created on Mon Feb 24 2020
 import numpy as np 
 from CubSplineInterpolation import aero_nodes, interpolation, funct_cub_spline
 from Integration import val_simpsons_rule_integration, funct_simpsons_rule_integration
-# from matplotlib import pyplot as plt # for testing
+from matplotlib import pyplot as plt # for testing
 
-def aero_load_interpolation(force_or_torque, n):
-    ''' Input:  force_or_torque =   Choose if you want to find the coefficients for the interpolant q(x) ['force'] or the coefficients for the interpolant t(x) ['shear']
-        Output: coeff =             These are the coefficients a0, a1, a2, ..., a40 which correspond to q(x) or t(x)
-                q_c or t_c =        These are the loads obtained after integrating along the chord for each spanwise location
-                x_dom =             This is the x domain over which the function is interpolated
+def aero_load_interpolation(force_or_torque, n, Ca, la, Nb, Nc, sc_z):
+    ''' Input:  force_or_torque =   Choose between 'force' or 'torque
+                n =                 The number of nodes used when setting an axis at which the cubic splines will be evaluated
+        Output: coeff =             These are the coefficients obtained from the interpolation
     '''
     
     aero_data = '/Users/frans/Desktop/AE/AE3212_II-Simulation_Varification_and_Validation/Python/Local/aerodynamicloaddo228.dat'
@@ -62,35 +61,33 @@ def aero_load_interpolation(force_or_torque, n):
 
     return coeff
     
-# ''' For testing '''
+''' For testing '''
 
-# # Only change these values !!!
-# Ca = 0.515  # [m] / chord length 
-# la = 2.691  # [m] / span length
-# Nz = 81
-# Nx = 41
-# n  = 1001
-# force_or_torque = 'force' # either 'torque' or 'force'
+# Only change these values !!!
+Ca = 0.515  # [m] / chord length 
+la = 2.691  # [m] / span length
+Nz = 81
+Nx = 41
+n  = 1001
+force_or_torque = 'force' # either 'torque' or 'force'
 
-# #----------------
-# z_nodes, x_nodes = aero_nodes(Ca, la, Nz, Nx)
+#----------------
+z_nodes, x_nodes = aero_nodes(Ca, la, Nz, Nx)
 
-# coeff = aero_load_interpolation(force_or_torque,n)
+coeff = aero_load_interpolation(force_or_torque,n, Ca, la, Nb, Nc, sc_z)
 
-# x_dom = np.linspace(x_nodes[0],x_nodes[-1],n)
-# y   = funct_cub_spline(x_dom, x_nodes, coeff)
+x_dom = np.linspace(x_nodes[0],x_nodes[-1],n)
+y   = funct_cub_spline(x_dom, x_nodes, coeff)
 
-# int1, x_dom_int1 = funct_simpsons_rule_integration(x_dom, n, y)
-# int2, x_dom_int2 = funct_simpsons_rule_integration(x_dom_int1, n, int1)
-# int3, x_dom_int3 = funct_simpsons_rule_integration(x_dom_int2, n, int2)
-# int4, x_dom_int4 = funct_simpsons_rule_integration(x_dom_int3, n, int3)
+int1, x_dom_int1 = funct_simpsons_rule_integration(x_dom, n, y)
+int2, x_dom_int2 = funct_simpsons_rule_integration(x_dom_int1, n, int1)
+int3, x_dom_int3 = funct_simpsons_rule_integration(x_dom_int2, n, int2)
+int4, x_dom_int4 = funct_simpsons_rule_integration(x_dom_int3, n, int3)
 
 
-# plt.plot(x_dom, y)
-# plt.plot(x_dom_int1, int1)
-# plt.plot(x_dom_int2, int2)
-# plt.plot(x_dom_int3, int3)
-# plt.plot(x_dom_int4, int4)
-# plt.show()
-
-# print()
+plt.plot(x_dom, y)
+plt.plot(x_dom_int1, int1)
+plt.plot(x_dom_int2, int2)
+plt.plot(x_dom_int3, int3)
+plt.plot(x_dom_int4, int4)
+plt.show()
