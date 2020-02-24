@@ -1,6 +1,5 @@
 import numpy as np
 
-#### Implementing the node spacing formulas in the lists
 def aero_nodes(Ca, la, Nz, Nx):
 
     Xnodes = np.zeros(Nx)
@@ -17,7 +16,6 @@ def aero_nodes(Ca, la, Nz, Nx):
 
     return Znodes, Xnodes
 
-#All data is structured, lets start with those cubic splinessss :), for this the second sammery for Applied Numerical Analysis is used#
 def interpolation(F, axis):
     ''' Input:  F = 1-D array containing all function values of the data points that needs to be interpolated
                 axis = 1-D array containing all grid points
@@ -79,43 +77,24 @@ def interpolation(F, axis):
         
     return Coeff
 
-def funct_cub_spline(domain, direction, nodes_co, coeff):
-    ''' Input:  domain = 
-                direction =
-                nodes_co =
-                coeff =
-        Output: val = 
+def funct_cub_spline(domain, nodes_co, coeff):
+    ''' Input:  domain = array containing all x-values at which the function will be evaluated
+                nodes_co = array containing all the nodes that were used to setup the cubic spline
+                coeff = the coefficient of the cubic splines, obtained from the interpolation function
+        Output: q = the function values at all predefined x values (domain)
     '''
-    if direction == 'chord':
-        q_z = []
-        for z in domain:
-            if z == nodes_co[0]:
-                index = 0
-            if z == nodes_co[-1]:
-                index = len(coeff[0]) -1
-            else:
-                index = np.where(np.abs(nodes_co) > abs(z))[0][0] -1 # find the index of the closest Znode to the left of the z coordinate 
+    q = []
+    for co in domain:
+        if co == nodes_co[0]:
+            index = 0
+        if co == nodes_co[-1]:
+            index = len(coeff[0]) -1
+        else:
+            index = np.where(np.abs(nodes_co) > abs(co))[0][0] -1
 
-            val = coeff[0][index] * (z - nodes_co[index])**3 + coeff[1][index] * (z - nodes_co[index])**2 + coeff[2][index] * (z - nodes_co[index]) + coeff[3][index] 
-            q_z.append(val)
+        val = coeff[0][index] * (co - nodes_co[index])**3 + coeff[1][index] * (co - nodes_co[index])**2 + coeff[2][index] * (co - nodes_co[index]) + coeff[3][index] 
+        q.append(val)
 
-        q_z = np.asarray(q_z)
+    q = np.asarray(q)
 
-        return q_z
-    
-    if direction == 'span':
-        q_x = []
-        for x in domain:
-            if x == nodes_co[0]:
-                index = 0
-            if x == nodes_co[-1]:
-                index = len(coeff[0]) -1
-            else:
-                index = np.where(nodes_co > x)[0][0] -1 # find the index of the closest Znode to the left of the z coordinate 
-
-            val = coeff[0][index] * (x - nodes_co[index])**3 + coeff[1][index] * (x - nodes_co[index])**2 + coeff[2][index] * (x - nodes_co[index]) + coeff[3][index] 
-            q_x.append(val)
-        
-        q_x = np.asarray(q_x)
-
-        return q_x
+    return q
