@@ -1,3 +1,4 @@
+
 import math as m
 import numpy as np
 
@@ -56,7 +57,7 @@ def MOI_and_centroid():
     #component Iyy
     Iyycirc = (r**3)*tskin*m.pi/2 + acirc*(((zbar-(r-(2*r/m.pi)))**2)-((2*r/m.pi)**2))
     Iyyspar = ((zbar-r)**2)*aspar
-    Iyycone = (tskin*(m.sqrt(r*r + (c-r)*(c-r)))**3)*(m.cos(phi))/12+(((r+(c-r)/2)-zbar)**2)*acone
+    Iyycone = 2*(tskin*(m.sqrt(r*r + (c-r)*(c-r)))**3)*(m.cos(phi))/12+(((r+(c-r)/2)-zbar)**2)*acone
     Iyystring = zbar*zbar*astr + ((zbar - strloc[1,0])**2)*2*astr + ((zbar - strloc[2,0])**2)*2*astr +((zbar - strloc[3,0])**2)*2*astr +((zbar - strloc[4,0])**2)*2*astr +((zbar - strloc[5,0])**2)*2*astr
     #total Iyy
     Iyy = Iyycirc + Iyyspar + Iyycone + Iyystring #unit = cm^4
@@ -73,7 +74,7 @@ def MOI_and_centroid():
     #print(Izz)
 
     zbar = -1*zbar/100
-    Iyy  = Iyy * 10**(-12)
-    Izz  = Izz * 10**(-12)
+    Iyy  = Iyy * 10**(-8)
+    Izz  = Izz * 10**(-8)
 
     return Iyy, Izz, zbar
