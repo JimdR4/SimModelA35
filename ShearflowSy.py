@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Feb 25 14:30:55 2020
-
 @author: cysch
 """
 
@@ -9,9 +8,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from Y_Coordinates_Stringers import y_coordinates_stringers
+
 from Z_Coordinates_Stringers import z_coordinates_stringers
-
-
 
 def q_b12(S_y, I_zz, n_stringer, Ca, h, t_sk, y_ce, B, omega1):
     if np.size(omega1) > 1:
@@ -21,18 +19,18 @@ def q_b12(S_y, I_zz, n_stringer, Ca, h, t_sk, y_ce, B, omega1):
                 raise ValueError('Omega1 should have a value between 0 and pi/2')
             R = h/2
             z = -(1-np.cos(omega))*R - z_ce
-            y = h*np.sin(omega)
+            # y = h*np.sin(omega)
             z_co, str_loc = z_coordinates_stringers(Ca, h, n_stringer)[:2]
             y_co, str_loc = y_coordinates_stringers(Ca, h, n_stringer)[:2]
 
-            val = -S_y/I_zz * (-t_sk*R**2*np.cos(omega)) 
+            val = -S_y/I_zz * (-t_sk*R**2*np.cos(omega) + t_sk*R**2 + 0.5*B*y_co[0]) 
 
             z_glob_c = z + z_ce
 
             for i in range(len(z_co)):
                 if str_loc[i] == 'c':
                     if abs(z_glob_c) >= abs(z_co[i]): 
-                        val = val + -S_y/I_zz* B* (y_co[i])
+                        val = val + -S_y/I_zz*B*y_co[i]
             
             values.append(val)
 
@@ -42,11 +40,11 @@ def q_b12(S_y, I_zz, n_stringer, Ca, h, t_sk, y_ce, B, omega1):
             
         R = h/2
         z = -(1-np.cos(omega1))*R - z_ce
-        y = h*np.sin(omega1)
+        # y = h*np.sin(omega1)
         z_co, str_loc = z_coordinates_stringers(Ca, h, n_stringer)[:2]
         y_co, str_loc = y_coordinates_stringers(Ca, h, n_stringer)[:2]
 
-        values = -S_y/I_yy * (-t_sk*R**2*np.cos(omega1))
+        values = -S_y/I_zz * (-t_sk*R**2*np.cos(omega1) + t_sk*R**2 + 0.5*B*y_co[0]) 
 
         z_glob_co = z + z_ce
 
@@ -90,6 +88,7 @@ def q_b42(S_y, I_zz, h, t_sp, z_ce, y1):
             raise ValueError('y should have a vale between 0 and R')
 
         values = -S_y/I_zz * ((t_sp*y1**2)/2)
+
     return values 
 
 def q_b23(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, s1):
@@ -131,7 +130,7 @@ def q_b23(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, s1):
             for i in range(len(z_co)):
                 if str_loc[i] == 's':
                     if abs(z_glob_c) >= abs(z_co[i]): 
-                        val = val + -S_y/I_zz*B*(y_co[i])
+                        val = val - S_y/I_zz*B*(y_co[i])
             
             values.append(val)
 
@@ -185,12 +184,13 @@ def q_b35(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, s2):
             y_co, str_loc, l_sk = y_coordinates_stringers(Ca, h, n_stringer)
             z_co, str_loc, l_sk = z_coordinates_stringers(Ca, h, n_stringer)
 
+            y_co = y_co*-1
 
             if s < 0 or s > l_sk:
                 raise ValueError('s1 should have a value between 0 and length of the straight skin')
 
-            y = -(R/l_sk)*s
-            z = -R-z_ce - (Ca-R)/l_sk * s
+            # y = -(R/l_sk)*s
+            z = -Ca-z_ce + (Ca-R)/l_sk * s
 
             val = -S_y/I_zz * (-t_sk*R/(2*l_sk)*s**2) + q_b23(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, l_sk)
 
@@ -198,7 +198,7 @@ def q_b35(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, s2):
 
             for i in range(len(z_co)):
                 if str_loc[i] == 's':
-                    if abs(z_glob_c) >= abs(z_co[i]): 
+                    if abs(z_glob_c) <= abs(z_co[i]): 
                         val = val + -S_y/I_zz*B*(y_co[i])
             
             values.append(val)
@@ -208,20 +208,21 @@ def q_b35(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, s2):
         z_co, str_loc, l_sk = z_coordinates_stringers(Ca, h, n_stringer)
         y_co, str_loc, l_sk = y_coordinates_stringers(Ca, h, n_stringer)
 
+        y_co = -1*y_co
 
-        if s1 < 0 or s1 > l_sk:
-            raise ValueError('s1 should have a value between 0 and length of the straight skin')
+        if s2 < 0 or s2 > l_sk:
+            raise ValueError('s2 should have a value between 0 and length of the straight skin')
         
-        y = -(R/l_sk)*s2
-        z = -R-z_ce - (Ca-R)/l_sk * s2
+        # y = -(R/l_sk)*s2
+        z = -Ca-z_ce + (Ca-R)/l_sk * s2
 
-        values = -S_y/I_zz * (-t_sk*R/(2*l_sk)*s**2) + q_b23(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, l_sk)
+        values = -S_y/I_zz * (-t_sk*R/(2*l_sk)*s2**2) + q_b23(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, l_sk)
 
         z_glob_co = z+z_ce
 
         for i in range(len(z_co)):
             if str_loc[i] == 's':
-                if abs(z_glob_co) >= abs(z_co[i]): 
+                if abs(z_glob_co) <= abs(z_co[i]): 
                     values = values + -S_y/I_zz*B*(y_co[i])
 
     return values
@@ -242,7 +243,7 @@ def q_b54(S_y, I_zz, h, t_sp, z_ce, y2):
                     - The coordinate system used for the integrations has the same orientation as the global coordinate system, but has its origin the the centroid
                     - Z-axis is assumed to be axis of symmetry
     '''
-
+    R = h/2
     if np.size(y2) > 1:
         values=[]
         for y in y2:
@@ -250,7 +251,7 @@ def q_b54(S_y, I_zz, h, t_sp, z_ce, y2):
             if y > 0 or y < -R:
                 raise ValueError('y should have a vale between -R and 0')
                 
-            val = -S_y/I_zz * ((t_sp*y**2)/2)
+            val = -S_y/I_zz * ((t_sp*y**2)/2 )
             
             values.append(val)
         
@@ -258,42 +259,47 @@ def q_b54(S_y, I_zz, h, t_sp, z_ce, y2):
         if y2 > 0 or y2 < -R:
             raise ValueError('y should have a vale between -R and 0')
         
-        values = -S_y/I_zz * ((-t_sp*y**2)/2)
+        values = -S_y/I_zz * ((t_sp*y2**2)/2)
 
 
     return values
 
 def q_b51(S_y, I_zz, n_stringer, Ca, h, t_sk, y_ce, B, omega2):
-    if np.size(omega1) > 1:
+    if np.size(omega2) > 1:
         values = []
-        for omega in omega1:
-            if omega < 0 or omega > np.pi/2:
-                raise ValueError('Omega1 should have a value between 0 and pi/2')
+        
+        for omega in omega2:
+            if omega > 0 or omega < -np.pi/2:
+                raise ValueError('Omega2 should have a value between 0 and pi/2')
             R = h/2
             z = -(1-np.cos(omega))*R - z_ce
-            y = h*np.sin(omega)
+            # y = h*np.sin(omega)
             z_co, str_loc = z_coordinates_stringers(Ca, h, n_stringer)[:2]
-            y_co, str_loc = z_coordinates_stringers(Ca, h, n_stringer)[:2]
+            y_co, str_loc = y_coordinates_stringers(Ca, h, n_stringer)[:2]
 
-            val = -S_y/I_zz * (-t_sk*R**2*np.cos(omega))
+            y_co = y_co*-1
+
+            val = -S_y/I_zz * (-t_sk*R**2*np.cos(omega)) + q_b35(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, l_straight_skin) - q_b54(S_y, I_zz, h, t_sp, z_ce, -R)
 
             z_glob_c = z + z_ce
 
             for i in range(len(z_co)):
                 if str_loc[i] == 'c':
-                    if abs(z_glob_c) >= abs(z_co[i]): 
+                    if abs(z_glob_c) <= abs(z_co[i]): 
                         val = val + -S_y/I_zz* B* (y_co[i])
             
             values.append(val)
 
     else:
-        if omega1 < 0 or omega1 > np.pi/2:
+        if omega2 < 0 or omega2 > np.pi/2:
             raise ValueError('Omega1 should have a value between 0 and pi/2')
 
         R = h/2
-        y = h*sin(omega)
+        y = h*np.sin(omega)
         z_co, str_loc = z_coordinates_stringers(Ca, h, n_stringer)[:2]
-        y_co, str_loc = z_coordinates_stringers(Ca, h, n_stringer)[:2]
+        y_co, str_loc = y_coordinates_stringers(Ca, h, n_stringer)[:2]
+
+        y_co = y_co**-1
 
         values = -S_y/I_zz * (-t_sk*R**2*np.cos(omega))
 
@@ -301,7 +307,7 @@ def q_b51(S_y, I_zz, n_stringer, Ca, h, t_sk, y_ce, B, omega2):
 
         for i in range(len(z_co)):
             if str_loc[i] == 'c':
-                if abs(z_glob_co) >= abs(z_co[i]): 
+                if abs(z_glob_co) <= abs(z_co[i]): 
                     values = values + -S_y/I_zz* B* (y_co[i])
 
     return values 
@@ -330,22 +336,16 @@ number_of_steps_on_domain = 1000
 ''' Program for single values 
 omega1 = np.pi/2        # value between 0 and pi/2
 shear_flow_1 = q_b12(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, omega1)
-
 y_1 = R                  # value between 0 and R
 shear_flow_2 = q_b42(S_y, I_zz, h, t_sp, z_ce, y_1)
-
 s1 = l_straight_skin    # value between 0 and l_straight_skin
 shear_flow_3 = q_b23(S_y, I_zz, n_stringer, Ca, h , t_sk, z_ce, B, s1)
-
 s2 = 0                  # value between 0 and l_straight_skin
 shear_flow_4 = q_b35(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, s2)
-
 y_2 = -R                 # value between -R and 0
 shear_flow_5 = q_b54(S_y, I_zz, h, t_sp, z_ce, y_2)
-
 omega2 = -np.pi/2       # value between -pi/2 and 0
 shear_flow_6 = q_b51(S_y, I_zz, n_stringer, Ca, h, t_sk, z_ce, B, omega2)
-
 print('\nshear flow circ_up: ', shear_flow_1,'\nshear flow spar_up: ', shear_flow_2,'\nshear flow straight_up: ', shear_flow_3,'\nshear flow straight_lo: ', shear_flow_4,'\nshear flow spar_lo: ', shear_flow_5,'\nshear flow circ_lo: ', shear_flow_6)
 '''
 
