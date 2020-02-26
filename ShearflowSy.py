@@ -250,7 +250,7 @@ def q_b54(S_y, I_zz, h, t_sp, z_ce, y2):
             if y > 0 or y < -R:
                 raise ValueError('y should have a vale between -R and 0')
                 
-            val = -S_y/I_zz * ((-t_sp*y**2)/2)
+            val = -S_y/I_zz * ((t_sp*y**2)/2)
             
             values.append(val)
         
@@ -363,7 +363,7 @@ shear_flow_3 = q_b23(S_y, I_yy, n_stringer, Ca, h , t_sk, z_ce, B, s1)
 s2 = np.linspace(0,l_straight_skin,number_of_steps_on_domain)
 shear_flow_4 = q_b35(S_y, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, s2)
 
-y_2 = np.linspace(-R,0,number_of_steps_on_domain)
+y_2 = np.linspace(0,-R,number_of_steps_on_domain)
 shear_flow_5 = q_b54(S_y, I_yy, h, t_sp, z_ce, y_2)
 
 omega2 = np.linspace(-np.pi/2,0,number_of_steps_on_domain)
