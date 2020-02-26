@@ -8,29 +8,30 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from Y_Coordinates_Stringers import y_coordinates_stringers
-
 from Z_Coordinates_Stringers import z_coordinates_stringers
+from Equations_needed_for_stress import Sz_x, Sy_x
 
-def q_b12y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, omega1):
+
+def q_b12y(R1y,RIy,R2y,P,R3y,x, I_zz, nst, Ca, ha, tsk, zsc, B, omega1):
     if np.size(omega1) > 1:
         values = []
         for omega in omega1:
             if omega < 0 or omega > np.pi/2:
                 raise ValueError('Omega1 should have a value between 0 and pi/2')
-            r = h/2
+            r = ha/2
             z = -(1-np.cos(omega))*r - zsc
             # y = h*np.sin(omega)
             z_co, str_loc = z_coordinates_stringers(Ca, ha, nst)[:2]
             y_co, str_loc = y_coordinates_stringers(Ca, ha, nst)[:2]
 
-            val = -S_y/I_zz * (-tsk*r**2*np.cos(omega) + tsk*r**2 + 0.5*B*y_co[0]) 
+            val = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * (-tsk*r**2*np.cos(omega) + tsk*r**2 + 0.5*B*y_co[0]) 
 
             z_glob_c = z + zsc
 
             for i in range(len(z_co)):
                 if str_loc[i] == 'c':
                     if abs(z_glob_c) >= abs(z_co[i]): 
-                        val = val + -S_y/I_zz*B*y_co[i]
+                        val = val + -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz*B*y_co[i]
             
             values.append(val)
 
@@ -44,20 +45,20 @@ def q_b12y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, omega1):
         z_co, str_loc = z_coordinates_stringers(Ca, ha, nst)[:2]
         y_co, str_loc = y_coordinates_stringers(Ca, ha, nst)[:2]
 
-        values = -S_y/I_zz * (-tsk*r**2*np.cos(omega1) + tsk*r**2 + 0.5*B*y_co[0]) 
+        values = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * (-tsk*r**2*np.cos(omega1) + tsk*r**2 + 0.5*B*y_co[0]) 
 
         z_glob_co = z + zsc
 
         for i in range(len(z_co)):
             if str_loc[i] == 'c':
                 if abs(z_glob_co) >= abs(z_co[i]): 
-                    values = values + -S_y/I_zz* B* (y_co[i])
+                    values = values + -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz* B* (y_co[i])
 
     return values 
 
-def q_b42y(S_y, I_zz, ha, tsp, zsc, y1):
-    ''' Input:      S_z = shear force in z direction
-                    I_yy = moment of inertia around the y axis
+def q_b42y(R1y,RIy,R2y,P,R3y,x, I_zz, ha, tsp, zsc, y1):
+    ''' Input:      R1y,RIy,R2y,P,R3y,x = shear force in y direction inputs
+                    I_zz = moment of inertia around the y axis
                     ha = height of aileron
                     tsp = spar thickness
                     zsc = z coordinate of shear center
@@ -78,7 +79,7 @@ def q_b42y(S_y, I_zz, ha, tsp, zsc, y1):
             if y < 0 or y > r:
                 raise ValueError('y should have a vale between 0 and R')
 
-            val = -S_y/I_zz * ((tsp*y**2)/2)
+            val = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * ((tsp*y**2)/2)
 
             values.append(val)
 
@@ -87,13 +88,13 @@ def q_b42y(S_y, I_zz, ha, tsp, zsc, y1):
         if y1 < 0 or y1 > r:
             raise ValueError('y should have a vale between 0 and R')
 
-        values = -S_y/I_zz * ((tsp*y1**2)/2)
+        values = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * ((tsp*y1**2)/2)
 
     return values 
 
-def q_b23y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, s1):
-    ''' Input:      S_z = shear force in z direction
-                    I_yy = moment of inertia around the y axis
+def q_b23y(R1y,RIy,R2y,P,R3y,x, I_zz, nst, Ca, ha, tsk, tsp, zsc, B, s1):
+    ''' Input:      R1y,RIy,R2y,P,R3y,x = shear force in y direction inputs
+                    I_zz = moment of inertia around the y axis
                     nst = the number of stringers used
                     Ca = lenth of chord
                     ha = height of aileron
@@ -123,14 +124,14 @@ def q_b23y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, s1):
                 raise ValueError('s1 should have a value between 0 and length of the straight skin')
             z = -r-zsc - (Ca-r)/l_sk * s
             y = r-(r/l_sk)*s
-            val = -S_y/I_zz * (tsk*r*s - tsk*r/(2*l_sk)*s**2) + q_b12y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, np.pi/2) + q_b42y(S_y, I_zz, ha, tsp, zsc, r)
+            val = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * (tsk*r*s - tsk*r/(2*l_sk)*s**2) + q_b12y(R1y,RIy,R2y,P,R3y,x, I_zz, nst, Ca, ha, tsk, zsc, B, np.pi/2) + q_b42y(R1y,RIy,R2y,P,R3y,x, I_zz, ha, tsp, zsc, r)
 
             z_glob_c = z+zsc
 
             for i in range(len(z_co)):
                 if str_loc[i] == 's':
                     if abs(z_glob_c) >= abs(z_co[i]): 
-                        val = val - S_y/I_zz*B*(y_co[i])
+                        val = val - Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz*B*(y_co[i])
             
             values.append(val)
 
@@ -146,20 +147,20 @@ def q_b23y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, s1):
         y = r-(r/l_sk)*s1
         z = -r-zsc - (Ca-r)/l_sk * s1
 
-        values = -S_y/I_zz * (tsk*r*s1 - tsk*r/(2*l_sk)*s1**2) + q_b12y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, np.pi/2) + q_b42y(S_y, I_zz, ha, tsp, zsc, r)
+        values = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * (tsk*r*s1 - tsk*r/(2*l_sk)*s1**2) + q_b12y(R1y,RIy,R2y,P,R3y,x, I_zz, nst, Ca, ha, tsk, zsc, B, np.pi/2) + q_b42y(R1y,RIy,R2y,P,R3y,x, I_zz, ha, tsp, zsc, r)
 
         z_glob_co = z+zsc
 
         for i in range(len(z_co)):
             if str_loc[i] == 's':
                 if abs(z_glob_co) >= abs(z_co[i]): 
-                    values = values + -S_y/I_zz*B*(y_co[i])
+                    values = values + -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz*B*(y_co[i])
 
     return values
 
-def q_b35y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, s2):
-    ''' Input:      S_z = shear force in z direction
-                    I_yy = moment of inertia around the y axis
+def q_b35y(R1y,RIy,R2y,P,R3y,x, I_zz, nst, Ca, ha, tsk, zsc, B, s2):
+    ''' Input:      R1y,RIy,R2y,P,R3y,x = shear force in y direction inputs
+                    I_zz = moment of inertia around the y axis
                     nst = the number of stringers used
                     Ca = lenth of chord
                     ha = height of aileron
@@ -192,14 +193,14 @@ def q_b35y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, s2):
             # y = -(R/l_sk)*s
             z = -Ca-zsc + (Ca-r)/l_sk * s
 
-            val = -S_y/I_zz * (-tsk*r/(2*l_sk)*s**2) + q_b23y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, l_sk)
+            val = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * (-tsk*r/(2*l_sk)*s**2) + q_b23y(R1y,RIy,R2y,P,R3y,x, I_zz, nst, Ca, ha, tsk, zsc, B, l_sk)
 
             z_glob_c = z+zsc
 
             for i in range(len(z_co)):
                 if str_loc[i] == 's':
                     if abs(z_glob_c) <= abs(z_co[i]): 
-                        val = val + -S_y/I_zz*B*(y_co[i])
+                        val = val + -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz*B*(y_co[i])
             
             values.append(val)
 
@@ -216,20 +217,20 @@ def q_b35y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, s2):
         # y = -(R/l_sk)*s2
         z = -Ca-zsc + (Ca-r)/l_sk * s2
 
-        values = -S_y/I_zz * (-tsk*r/(2*l_sk)*s2**2) + q_b23y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, l_sk)
+        values = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * (-tsk*r/(2*l_sk)*s2**2) + q_b23y(R1y,RIy,R2y,P,R3y,x, I_zz, nst, Ca, ha, tsk, zsc, B, l_sk)
 
         z_glob_co = z+zsc
 
         for i in range(len(z_co)):
             if str_loc[i] == 's':
                 if abs(z_glob_co) <= abs(z_co[i]): 
-                    values = values + -S_y/I_zz*B*(y_co[i])
+                    values = values + -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz*B*(y_co[i])
 
     return values
 
-def q_b54y(S_y, I_zz, ha, tsp, zsc, y2):
-    ''' Input:      S_z = shear force in z direction
-                    I_yy = moment of inertia around the y axis
+def q_b54y(R1y,RIy,R2y,P,R3y,x, I_zz, ha, tsp, zsc, y2):
+    ''' Input:      R1y,RIy,R2y,P,R3y,x = shear force in y direction inputs
+                    I_zz = moment of inertia around the y axis
                     ha = height of aileron
                     tsp = spar thickness
                     zsc = z coordinate of shear center
@@ -250,7 +251,7 @@ def q_b54y(S_y, I_zz, ha, tsp, zsc, y2):
             if y > 0 or y < -r:
                 raise ValueError('y should have a vale between -R and 0')
                 
-            val = -S_y/I_zz * ((tsp*y**2)/2 )
+            val = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * ((tsp*y**2)/2 )
             
             values.append(val)
         
@@ -258,12 +259,12 @@ def q_b54y(S_y, I_zz, ha, tsp, zsc, y2):
         if y2 > 0 or y2 < -r:
             raise ValueError('y should have a vale between -R and 0')
         
-        values = -S_y/I_zz * ((tsp*y2**2)/2)
+        values = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * ((tsp*y2**2)/2)
 
 
     return values
 
-def q_b51y(S_y, I_zz, nst, Ca, ha, tsk, y_ce, B, omega2):
+def q_b51y(R1y,RIy,R2y,P,R3y,x, I_zz, nst, Ca, ha, tsk, tsp, zsc, l, y_ce, B, omega2):
     if np.size(omega2) > 1:
         values = []
         
@@ -278,14 +279,14 @@ def q_b51y(S_y, I_zz, nst, Ca, ha, tsk, y_ce, B, omega2):
 
             y_co = y_co*-1
 
-            val = -S_y/I_zz * (-tsk*r**2*np.cos(omega)) + q_b35y(S_y, I_zz, nst, Ca, ha, tsk, zsc, B, l) - q_b54y(S_y, I_zz, ha, tsp, zsc, -r)
+            val = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * (-tsk*r**2*np.cos(omega)) + q_b35y(R1y,RIy,R2y,P,R3y,x, I_zz, nst, Ca, ha, tsk, zsc, B, l) - q_b54y(R1y,RIy,R2y,P,R3y,x, I_zz, ha, tsp, zsc, -r)
 
             z_glob_c = z + zsc
 
             for i in range(len(z_co)):
                 if str_loc[i] == 'c':
                     if abs(z_glob_c) <= abs(z_co[i]): 
-                        val = val + -S_y/I_zz* B* (y_co[i])
+                        val = val + -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz* B* (y_co[i])
             
             values.append(val)
 
@@ -294,20 +295,20 @@ def q_b51y(S_y, I_zz, nst, Ca, ha, tsk, y_ce, B, omega2):
             raise ValueError('Omega1 should have a value between 0 and pi/2')
 
         r = ha/2
-        y = h*np.sin(omega)
+        y = ha*np.sin(omega)
         z_co, str_loc = z_coordinates_stringers(Ca, ha, nst)[:2]
         y_co, str_loc = y_coordinates_stringers(Ca, ha, nst)[:2]
 
         y_co = y_co**-1
 
-        values = -S_y/I_zz * (-tsk*r**2*np.cos(omega))
+        values = -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz * (-tsk*r**2*np.cos(omega))
 
         z_glob_co = z + zsc
 
         for i in range(len(z_co)):
             if str_loc[i] == 'c':
                 if abs(z_glob_co) <= abs(z_co[i]): 
-                    values = values + -S_y/I_zz* B* (y_co[i])
+                    values = values + -Sy_x(R1y,RIy,R2y,P,R3y,x)/I_zz* B* (y_co[i])
 
     return values 
 
