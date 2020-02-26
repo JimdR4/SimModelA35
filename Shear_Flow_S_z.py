@@ -9,14 +9,14 @@ import numpy as np
 from Z_Coordinates_Stringers import z_coordinates_stringers
 from MOI_and_Centroid import MOI_and_centroid
 
-def q_b12(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, omega1):
+def q_b12(S_z, I_yy, nst, Ca, ha, tsk, zsc, B, omega1):
     ''' Input:      S_z = shear force in z direction
                     I_yy = moment of inertia around the y axis
-                    n_stringer = the number of stringers used
+                    nst = the number of stringers used
                     Ca = lenth of chord
-                    h = height of aileron
-                    t_sk = skin thickness
-                    z_sc = z coordinate of shear center
+                    ha = height of aileron
+                    tsk = skin thickness
+                    zsc = z coordinate of shear center
                     B = boom area
                     omega1 = defined as clockwise positive // works for both single value and array of values
         Output:     values = shear flow at omega1 // singel value or array of values
@@ -33,18 +33,18 @@ def q_b12(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, omega1):
         for omega in omega1:
             if omega < 0 or omega > np.pi/2:
                 raise ValueError('Omega1 should have a value between 0 and pi/2')
-            R = h/2
-            z = -(1-np.cos(omega))*R - z_ce
-            z_co, str_loc = z_coordinates_stringers(Ca, h, n_stringer)[:2]
+            r = ha/2
+            z = -(1-np.cos(omega))*r - zsc
+            z_co, str_loc = z_coordinates_stringers(Ca, ha, nst)[:2]
 
-            val = -S_z/I_yy * (-t_sk*R**2*omega + t_sk*R**2*np.sin(omega) - t_sk*z_ce*R*omega + 0.5*B*(z_co[0]-z_ce))
+            val = -S_z/I_yy * (-tsk*r**2*omega + tsk*r**2*np.sin(omega) - tsk*zsc*r*omega + 0.5*B*(z_co[0]-zsc))
 
-            z_glob_c = z + z_ce
+            z_glob_c = z + zsc
 
             for i in range(len(z_co)):
                 if str_loc[i] == 'c':
                     if abs(z_glob_c) >= abs(z_co[i]): 
-                        val = val + -S_z/I_yy* B* (z_co[i]-z_ce)
+                        val = val + -S_z/I_yy* B* (z_co[i]-zsc)
             
             values.append(val)
 
@@ -52,26 +52,26 @@ def q_b12(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, omega1):
         if omega1 < 0 or omega1 > np.pi/2:
             raise ValueError('Omega1 should have a value between 0 and pi/2')
 
-        R = h/2
-        z = -(1-np.cos(omega1))*R - z_ce
-        z_co, str_loc = z_coordinates_stringers(Ca, h, n_stringer)[:2]
-        values = -S_z/I_yy * (-t_sk*R**2*omega1 + t_sk*R**2*np.sin(omega1) - t_sk*z_ce*R*omega1 + 0.5*B*(z_co[0]-z_ce))
+        r = h/2
+        z = -(1-np.cos(omega1))*R - zsc
+        z_co, str_loc = z_coordinates_stringers(Ca, ha, nst)[:2]
+        values = -S_z/I_yy * (-tsk*r**2*omega1 + tsk*r**2*np.sin(omega1) - tsk*zsc*r*omega1 + 0.5*B*(z_co[0]-zsc))
 
-        z_glob_co = z + z_ce
+        z_glob_co = z + zsc
 
         for i in range(len(z_co)):
             if str_loc[i] == 'c':
                 if abs(z_glob_co) >= abs(z_co[i]): 
-                    values = values + -S_z/I_yy* B* (z_co[i]-z_ce)
+                    values = values + -S_z/I_yy* B* (z_co[i]-zsc)
 
     return values 
 
-def q_b42(S_z, I_yy, h, t_sp, z_ce, y1):
+def q_b42(S_z, I_yy, ha, tsp, zsc, y1):
     ''' Input:      S_z = shear force in z direction
                     I_yy = moment of inertia around the y axis
-                    h = height of aileron
-                    t_sp = spar thickness
-                    z_sc = z coordinate of shear center
+                    ha = height of aileron
+                    tsp = spar thickness
+                    zsc = z coordinate of shear center
                     y1 = defined as upwards positive // works for both single value and array of values
         Output:     values = shear flow at y // singel value or array of values
                     if wanted remove #: z_glob_co = the z-coordinate in the global coordinate frame corresponding to y1 // works for both single value of y1 and array of y1
@@ -85,31 +85,31 @@ def q_b42(S_z, I_yy, h, t_sp, z_ce, y1):
     if np.size(y1) > 1:
         values = []
         for y in y1:
-            R = h/2
-            if y < 0 or y > R:
+            r = h/2
+            if y < 0 or y > r:
                 raise ValueError('y should have a vale between 0 and R')
 
-            val = -S_z/I_yy * (-R*t_sp*y - z_ce*t_sp*y)
+            val = -S_z/I_yy * (-r*tsp*y - zsc*tsp*y)
 
             values.append(val)
 
     else:
-        R = h/2
-        if y1 < 0 or y1 > R:
+        r = h/2
+        if y1 < 0 or y1 > r:
             raise ValueError('y should have a vale between 0 and R')
 
-        values = -S_z/I_yy * (-R*t_sp*y1 - z_ce*t_sp*y1)
+        values = -S_z/I_yy * (-r*tsp*y1 - zsc*tsp*y1)
 
     return values 
 
-def q_b23(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, s1):
+def q_b23(S_z, I_yy, nst, Ca, ha, tsk, zsc, B, s1):
     ''' Input:      S_z = shear force in z direction
                     I_yy = moment of inertia around the y axis
-                    n_stringer = the number of stringers used
+                    nst = the number of stringers used
                     Ca = lenth of chord
-                    h = height of aileron
-                    t_sk = skin thickness
-                    z_sc = z coordinate of shear center
+                    ha = height of aileron
+                    tsk = skin thickness
+                    zsc = z coordinate of shear center
                     B = boom area
                     s1 = defined as clockwise positive // works for both single value and array of values
         Output:     values = shear flow at s1 // singel value or array of values
@@ -125,51 +125,51 @@ def q_b23(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, s1):
         values = []
 
         for s in s1:
-            R = h/2
-            z_co, str_loc, l_sk = z_coordinates_stringers(Ca, h, n_stringer)
+            r = h/2
+            z_co, str_loc, l_sk = z_coordinates_stringers(Ca, ha, nst)
 
             if s < 0 or s > l_sk:
                 raise ValueError('s1 should have a value between 0 and length of the straight skin')
 
-            z = -R-z_ce - (Ca-R)/l_sk * s
-            val = -S_z/I_yy * (-t_sk*R*s - t_sk*z_ce*s - t_sk*(Ca-R)/(2*l_sk)*s**2) + q_b12(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, np.pi/2) + q_b42(S_z, I_yy, h, t_sp, z_ce, R)
+            z = -r-zsc - (Ca-r)/l_sk * s
+            val = -S_z/I_yy * (-tsk*r*s - tsk*zsc*s - tsk*(Ca-r)/(2*l_sk)*s**2) + q_b12(S_z, I_yy, nst, Ca, ha, tsk, zsc, B, np.pi/2) + q_b42(S_z, I_yy, ha, tsp, zsc, r)
 
-            z_glob_c = z+z_ce
+            z_glob_c = z+zsc
 
             for i in range(len(z_co)):
                 if str_loc[i] == 's':
                     if abs(z_glob_c) >= abs(z_co[i]): 
-                        val = val + -S_z/I_yy*B*(z_co[i]-z_ce)
+                        val = val + -S_z/I_yy*B*(z_co[i]-zsc)
             
             values.append(val)
 
     else:
-        R = h/2
-        z_co, str_loc, l_sk = z_coordinates_stringers(Ca, h, n_stringer)
+        r = h/2
+        z_co, str_loc, l_sk = z_coordinates_stringers(Ca, ha, nst)
 
         if s1 < 0 or s1 > l_sk:
             raise ValueError('s1 should have a value between 0 and length of the straight skin')
 
-        z = -R-z_ce - (Ca-R)/l_sk * s1
-        values = -S_z/I_yy * (-t_sk*R*s1 - t_sk*z_ce*s1 - t_sk*(Ca-R)/(2*l_sk)*s1**2) + q_b12(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, np.pi/2) + q_b42(S_z, I_yy, h, t_sp, z_ce, R)
+        z = -r-zsc - (Ca-r)/l_sk * s1
+        values = -S_z/I_yy * (-tsk*r*s1 - tsk*zsc*s1 - tsk*(Ca-r)/(2*l_sk)*s1**2) + q_b12(S_z, I_yy, nst, Ca, ha, tsk, zsc, B, np.pi/2) + q_b42(S_z, I_yy, ha, tsp, zsc, r)
 
-        z_glob_co = z+z_ce
+        z_glob_co = z+zsc
 
         for i in range(len(z_co)):
             if str_loc[i] == 's':
                 if abs(z_glob_co) >= abs(z_co[i]): 
-                    values = values + -S_z/I_yy*B*(z_co[i]-z_ce)
+                    values = values + -S_z/I_yy*B*(z_co[i]-zsc)
 
     return values
 
-def q_b35(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, s2):
+def q_b35(S_z, I_yy, nst, Ca, ha, tsk, zsc, B, s2):
     ''' Input:      S_z = shear force in z direction
                     I_yy = moment of inertia around the y axis
-                    n_stringer = the number of stringers used
+                    nst = the number of stringers used
                     Ca = lenth of chord
-                    h = height of aileron
-                    t_sk = skin thickness
-                    z_sc = z coordinate of shear center
+                    ha = height of aileron
+                    tsk = skin thickness
+                    zsc = z coordinate of shear center
                     B = boom area
                     s1 = defined as clockwise positive // works for both single value and array of values
         Output:     val = shear flow at s2 // singel value or array of values
@@ -181,7 +181,7 @@ def q_b35(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, s2):
                     - The coordinate system used for the integrations has the same orientation as the global coordinate system, but has its origin the the centroid
                     - Z-axis is assumed to be axis of symmetry
     '''
-    l_sk = z_coordinates_stringers(Ca, h, n_stringer)[2]
+    l_sk = z_coordinates_stringers(Ca, ha, nst)[2]
 
     if np.size(s2) > 1:
         for s in s2:
@@ -192,18 +192,18 @@ def q_b35(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, s2):
         if s2 < 0 or s2> l_sk:
             raise ValueError('s1 should have a value between 0 and length of the straight skin') 
     
-    values = q_b23(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, l_sk-s2)
+    values = q_b23(S_z, I_yy, nst, Ca, ha, tsk, zsc, B, l_sk-s2)
     values = np.asarray(values)
     values = values*-1
 
     return values 
 
-def q_b54(S_z, I_yy, h, t_sp, z_ce, y2):
+def q_b54(S_z, I_yy, ha, tsp, zsc, y2):
     ''' Input:      S_z = shear force in z direction
                     I_yy = moment of inertia around the y axis
-                    h = height of aileron
-                    t_sp = spar thickness
-                    z_sc = z coordinate of shear center
+                    ha = height of aileron
+                    tsp = spar thickness
+                    zsc = z coordinate of shear center
                     y = defined as upwards positive // works for both single value and array of values
         Output:     val = shear flow at y // singel value or array of values
                     if wanted remove #: z_glob_co = the z-coordinate in the global coordinate frame corresponding to y2 // works for both single value of y2 and array of y2
@@ -214,31 +214,31 @@ def q_b54(S_z, I_yy, h, t_sp, z_ce, y2):
                     - The coordinate system used for the integrations has the same orientation as the global coordinate system, but has its origin the the centroid
                     - Z-axis is assumed to be axis of symmetry
     '''
-    R = h/2
+    r = h/2
 
     if np.size(y2) > 1:
         for y in y2:
-            if y > 0 or y < -R:
+            if y > 0 or y < -r:
                 raise ValueError('y should have a vale between -R and 0')
         
     else:
-        if y2 > 0 or y2 < -R:
+        if y2 > 0 or y2 < -r:
             raise ValueError('y should have a vale between -R and 0')
 
-    values = q_b42(S_z, I_yy, h, t_sp, z_ce, -1*y2)
+    values = q_b42(S_z, I_yy, ha, tsp, zsc, -1*y2)
     values = np.asarray(values)
     values = values*-1
 
     return values
 
-def q_b51(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, omega2):
+def q_b51(S_z, I_yy, nst, Ca, ha, tsk, zsc, B, omega2):
     ''' Input:      S_z = shear force in z direction
                     I_yy = moment of inertia around the y axis
-                    n_stringer = the number of stringers used
+                    nst = the number of stringers used
                     Ca = lenth of chord
-                    h = height of aileron
-                    t_sk = skin thickness
-                    z_sc = z coordinate of shear center
+                    ha = height of aileron
+                    tsk = skin thickness
+                    zsc = z coordinate of shear center
                     B = boom area
                     omega2 = defined as clockwise positive
         Output:     val = shear flow at omega1
@@ -257,12 +257,12 @@ def q_b51(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, omega2):
         if omega2 > 0 or omega2 < -np.pi/2:
             raise ValueError('Omega1 should have a value between -pi/2 and 0')
 
-    values = q_b12(S_z, I_yy, n_stringer, Ca, h, t_sk, z_ce, B, -1*omega2)
+    values = q_b12(S_z, I_yy, nst, Ca, ha, tsk, zsc, B, -1*omega2)
     values = np.asarray(values)
     values = values*-1
 
     return values
-
+"""
 ''''''''' FOR TESTING '''''''''
 ''' Remarks:    Coordinate system at leading edge with y-axis pointing upwards and z-axis pointing away from the aileron
                 These shearflows are caused only due to a horizontal shear force S_z(x) which acts along the chord and therefore through the shear center '''
@@ -346,3 +346,5 @@ print('\nshear flow circ_up: ', shear_flow_1,'\nshear flow spar_up: ', shear_flo
 # plt.figure('circ part 2, pos: clock wise')
 # plt.plot(omega2, shear_flow_6)
 # plt.show()
+
+"""
