@@ -8,6 +8,7 @@ import numpy as np
 
 from Z_Coordinates_Stringers import z_coordinates_stringers
 from MOI_and_Centroid import MOI_and_centroid
+from Equations_needed_for_stress import Sz_x, Sy_x
 
 def q_b12z(R1z,RIz,R2z,P,R3z,x, I_yy, nst, Ca, ha, tsk, zsc, B, omega1):
     ''' Input:      R1z,RIz,R2z,P,R3z,x = shear force in z direction inputs
@@ -52,8 +53,8 @@ def q_b12z(R1z,RIz,R2z,P,R3z,x, I_yy, nst, Ca, ha, tsk, zsc, B, omega1):
         if omega1 < 0 or omega1 > np.pi/2:
             raise ValueError('Omega1 should have a value between 0 and pi/2')
 
-        r = h/2
-        z = -(1-np.cos(omega1))*R - zsc
+        r = ha/2
+        z = -(1-np.cos(omega1))*r - zsc
         z_co, str_loc = z_coordinates_stringers(Ca, ha, nst)[:2]
         values = -Sz_x(R1z,RIz,R2z,P,R3z,x)/I_yy * (-tsk*r**2*omega1 + tsk*r**2*np.sin(omega1) - tsk*zsc*r*omega1 + 0.5*B*(z_co[0]-zsc))
 
@@ -85,7 +86,7 @@ def q_b42z(R1z,RIz,R2z,P,R3z,x, I_yy, ha, tsp, zsc, y1):
     if np.size(y1) > 1:
         values = []
         for y in y1:
-            r = h/2
+            r = ha/2
             if y < 0 or y > r:
                 raise ValueError('y should have a vale between 0 and R')
 
@@ -94,7 +95,7 @@ def q_b42z(R1z,RIz,R2z,P,R3z,x, I_yy, ha, tsp, zsc, y1):
             values.append(val)
 
     else:
-        r = h/2
+        r = ha/2
         if y1 < 0 or y1 > r:
             raise ValueError('y should have a vale between 0 and R')
 
@@ -102,7 +103,7 @@ def q_b42z(R1z,RIz,R2z,P,R3z,x, I_yy, ha, tsp, zsc, y1):
 
     return values 
 
-def q_b23z(R1z,RIz,R2z,P,R3z,x, I_yy, nst, Ca, ha, tsk, zsc, B, s1):
+def q_b23z(R1z,RIz,R2z,P,R3z,x, I_yy, nst, Ca, ha, tsk, tsp, zsc, B, s1):
     ''' Input:      R1z,RIz,R2z,P,R3z,x = shear force in z direction inputs
                     I_yy = moment of inertia around the y axis
                     nst = the number of stringers used
@@ -125,7 +126,7 @@ def q_b23z(R1z,RIz,R2z,P,R3z,x, I_yy, nst, Ca, ha, tsk, zsc, B, s1):
         values = []
 
         for s in s1:
-            r = h/2
+            r = ha/2
             z_co, str_loc, l_sk = z_coordinates_stringers(Ca, ha, nst)
 
             if s < 0 or s > l_sk:
@@ -144,7 +145,7 @@ def q_b23z(R1z,RIz,R2z,P,R3z,x, I_yy, nst, Ca, ha, tsk, zsc, B, s1):
             values.append(val)
 
     else:
-        r = h/2
+        r = ha/2
         z_co, str_loc, l_sk = z_coordinates_stringers(Ca, ha, nst)
 
         if s1 < 0 or s1 > l_sk:
