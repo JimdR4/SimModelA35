@@ -24,17 +24,23 @@ def z_coordinates_stringers(Ca, h, n_stringer):
     str_on_circ     = int(l_circ/d_stringer)
     str_on_straight = int((n_stringer)/2 - str_on_circ)
     strloc          = np.zeros(str_on_circ+str_on_straight+1)
+    strlocc         = np.zeros(nst)
     strname         = np.empty(str_on_circ+str_on_straight+1,dtype=str)
 
     for i in range(1,str_on_circ+1):
         l1 = np.cos( (d_stringer*i)/l_circ * np.pi/2 )*R
         z = R - l1
         strloc[i] = -1*z
+        strlocc[i] = -1*z
         strname[i] = 'c'
 
     for i in range(str_on_straight):
         z = Ca - (l_circ + l_straight - ( (str_on_circ+1)*d_stringer + i*d_stringer ))*(Ca-R)/l_straight
         strloc[i+str_on_circ+1] = -1*z
+        rlocc[i+str_on_circ+1] = -1*z
         strname[i+str_on_circ+1] = 's'
+        
+    for i in range(1,(int(nst/2)+1)):
+        strlocc [nst-i] = strlocc [i]
 
-    return strloc, strname, l_straight
+    return strloc, strname, l_straight, strlocc
