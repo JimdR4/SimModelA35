@@ -7,13 +7,13 @@ import numpy as np
 from CubSplineInterpolation import aero_nodes, interpolation 
 from Integration import simp_val, simp_func
 
-def aero_interpolation(force_or_torque, Ca, la, Nx, Nz, sc_z, x):
+def aero_interpolation(force_or_torque, Ca, la, Nx, Nz, zsc, x):
     ''' Input:  force_or_torque =   Choose between 'force' or 'torque
                 Ca =                length of the chord
                 la =                length of the span
                 Nx =                number of aero nodes in x direction (span)
                 Nz =                number of aero nodes in z direction (chord)
-                sc_z =              z coordinate of shear center
+                zsc =               z coordinate of shear center
                 x =                 either a single value or array that will be used as function variable
         Output: qx_dom =    the function value(s) at the evaluated x
 
@@ -62,13 +62,13 @@ def aero_interpolation(force_or_torque, Ca, la, Nx, Nz, sc_z, x):
 
     return qx_dom
 
-def aero_int_1(force_or_torque, Ca, la, Nx, Nz, sc_z, x):
+def aero_int_1(force_or_torque, Ca, la, Nx, Nz, zsc, x):
     ''' Input:  force_or_torque =   Choose between 'force' or 'torque
                 Ca =                length of the chord
                 la =                length of the span
                 Nx =                number of aero nodes in x direction (span)
                 Nz =                number of aero nodes in z direction (chord)
-                sc_z =              z coordinate of shear center
+                zsc =               z coordinate of shear center
                 x =                 either a single value or array that will be used as function variable
         Output: int1 =  the function value(s) at the evaluated x
     '''
@@ -77,18 +77,18 @@ def aero_int_1(force_or_torque, Ca, la, Nx, Nz, sc_z, x):
     x_nodes = aero_nodes(Ca, la, Nz, Nx)[1]
     x_dom   = np.linspace(x_nodes[0], x_nodes[-1], n)                               # create an x-axis on which to evaluate the created splines
                                  
-    values = aero_interpolation(force_or_torque, Ca, la, Nx, Nz, sc_z, x_dom)       # get the aerodynamic load qx on the created x_dom
+    values = aero_interpolation(force_or_torque, Ca, la, Nx, Nz, zsc, x_dom)       # get the aerodynamic load qx on the created x_dom
     int1    = simp_func(x, n, x_dom, values)                                         # get the integral of the aerodynamic load int(qx) value(s) 
 
     return int1
 
-def aero_int_2(force_or_torque, Ca, la, Nx, Nz, sc_z, x):
+def aero_int_2(force_or_torque, Ca, la, Nx, Nz, zsc, x):
     ''' Input:  force_or_torque =   Choose between 'force' or 'torque
                 Ca =                length of the chord
                 la =                length of the span
                 Nx =                number of aero nodes in x direction (span)
                 Nz =                number of aero nodes in z direction (chord)
-                sc_z =              z coordinate of shear center
+                zsc =               z coordinate of shear center
                 x =                 either a single value or array that will be used as function variable
         Output: int2 =  the function value(s) at the evaluated x
     '''
@@ -97,18 +97,18 @@ def aero_int_2(force_or_torque, Ca, la, Nx, Nz, sc_z, x):
     x_nodes = aero_nodes(Ca, la, Nz, Nx)[1]
     x_dom   = np.linspace(x_nodes[0], x_nodes[-1], n)                               # create an x-axis on which to evaluate the created splines
                                  
-    int1_dom = aero_int_1(force_or_torque, Ca, la, Nx, Nz, sc_z, x_dom)             # get the integral of the aerodynamic load values
+    int1_dom = aero_int_1(force_or_torque, Ca, la, Nx, Nz, zsc, x_dom)             # get the integral of the aerodynamic load values
     int2    = simp_func(x, n, x_dom, int1_dom)                                      # get the second integral of the aerodynamic load value(s) 
 
     return int2
 
-def aero_int_3(force_or_torque, Ca, la, Nx, Nz, sc_z, x):
+def aero_int_3(force_or_torque, Ca, la, Nx, Nz, zsc, x):
     ''' Input:  force_or_torque =   Choose between 'force' or 'torque
                 Ca =                length of the chord
                 la =                length of the span
                 Nx =                number of aero nodes in x direction (span)
                 Nz =                number of aero nodes in z direction (chord)
-                sc_z =              z coordinate of shear center
+                zsc =               z coordinate of shear center
                 x =                 either a single value or array that will be used as function variable
         Output: int3 =  the function value(s) at the evaluated x
     '''
@@ -117,18 +117,18 @@ def aero_int_3(force_or_torque, Ca, la, Nx, Nz, sc_z, x):
     x_nodes = aero_nodes(Ca, la, Nz, Nx)[1]
     x_dom   = np.linspace(x_nodes[0], x_nodes[-1], n)                               # create an x-axis on which to evaluate the created splines
                                  
-    int2_dom = aero_int_2(force_or_torque, Ca, la, Nx, Nz, sc_z, x_dom)             # get the secon integral of the aerodynamic load values 
+    int2_dom = aero_int_2(force_or_torque, Ca, la, Nx, Nz, zsc, x_dom)             # get the secon integral of the aerodynamic load values 
     int3     = simp_func(x, n, x_dom, int2_dom)                                     # get the third integral of the aerodynamic load value(s)
 
     return int3
 
-def aero_int_4(force_or_torque, Ca, la, Nx, Nz, sc_z, x):
+def aero_int_4(force_or_torque, Ca, la, Nx, Nz, zsc, x):
     ''' Input:  force_or_torque =   Choose between 'force' or 'torque
                 Ca =                length of the chord
                 la =                length of the span
                 Nx =                number of aero nodes in x direction (span)
                 Nz =                number of aero nodes in z direction (chord)
-                sc_z =              z coordinate of shear center
+                zsc =               z coordinate of shear center
                 x =                 either a single value or array that will be used as function variable
         Output: int4 =  the function value(s) at the evaluated x
     '''
@@ -137,7 +137,7 @@ def aero_int_4(force_or_torque, Ca, la, Nx, Nz, sc_z, x):
     x_nodes = aero_nodes(Ca, la, Nz, Nx)[1]
     x_dom   = np.linspace(x_nodes[0], x_nodes[-1], n)                               # create an x-axis on which to evaluate the created splines
                                  
-    int3_dom = aero_int_3(force_or_torque, Ca, la, Nx, Nz, sc_z, x_dom)             # get the third integral of the aerodynamic load values
+    int3_dom = aero_int_3(force_or_torque, Ca, la, Nx, Nz, zsc, x_dom)             # get the third integral of the aerodynamic load values
     int4     = simp_func(x, n, x_dom, int3_dom)                                     # get the fourth integral of the aerodynamic load value(s)
 
     return int4
