@@ -1,7 +1,7 @@
 import math as m
 import numpy as np
 
-def J(ha,a1,a2,tsp,tsk,l):
+def JJ(ha,a1,a2,tsp,tsk,l):
     TT = 1
     matrix1 = np.array([[2*a1,2*a2],
                     [(m.pi*(0.5*ha)/(2*a1*tsk)+((0.5*ha)/(a1*tsp))+((0.5*ha)/(a2*tsp))),(-((0.5*ha)/(a1*tsp))-l/(a2*tsk)-(0.5*ha)/(a2*tsp))]])
@@ -18,3 +18,15 @@ def J(ha,a1,a2,tsp,tsk,l):
 
     J = (TT/ Gdthetadz2)[0]
     return J
+
+def q0(ha,a1,a2,tsp,tsk,l,T):
+    matrix1 = np.array([[2*a1,2*a2],
+                    [(m.pi*(0.5*ha)/(2*a1*tsk)+((0.5*ha)/(a1*tsp))+((0.5*ha)/(a2*tsp))),(-((0.5*ha)/(a1*tsp))-l/(a2*tsk)-(0.5*ha)/(a2*tsp))]])
+    m2 = np.array([[T],
+                [0]])
+
+    solu = np.linalg.solve(matrix1,m2)
+
+    q01 = solu[0]
+    q02 = solu[1]
+    return q01, q02
